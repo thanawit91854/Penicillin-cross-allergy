@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Beta-lactam Cross-Allergy Checker</title>
+<style>
+:root{--bg:#f3f6fb;--card:#fff;--ink:#0b1220;--mut:#5b6678;--blue:#1456d6;--blue2:#0a2a6b;--red:#d62839;--redbg:#fdecee;--bluebg:#e8f0fe;--line:#dce3ee;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a0f1c;--card:#121a2c;--ink:#eef2fa;--mut:#9aa7bd;--blue:#5b8cff;--blue2:#0a2a6b;--red:#ff5b6b;--redbg:#2a1419;--bluebg:#13213f;--line:#25304a}}
+:root[data-theme="dark"]{--bg:#0a0f1c;--card:#121a2c;--ink:#eef2fa;--mut:#9aa7bd;--blue:#5b8cff;--blue2:#0a2a6b;--red:#ff5b6b;--redbg:#2a1419;--bluebg:#13213f;--line:#25304a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans Thai","Sarabun",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
+header{background:linear-gradient(135deg,#0a2a6b,#1456d6);color:#fff;padding:28px 20px 56px}
+.wrap{max-width:860px;margin:0 auto}
+h1{margin:0 0 6px;font-size:clamp(1.3rem,4.5vw,1.9rem)}
+header p{margin:0;opacity:.85;font-size:.92rem}
+.tag{display:inline-block;background:var(--red);color:#fff;border-radius:99px;padding:2px 12px;font-size:.75rem;margin-bottom:10px;font-weight:600}
+main{max-width:860px;margin:-36px auto 0;padding:0 16px 40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px;box-shadow:0 6px 24px rgba(10,42,107,.08)}
+.card h2{margin:0 0 12px;font-size:1.05rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+label{font-size:.78rem;color:var(--mut);display:block;margin-bottom:4px}
+input{width:100%;padding:11px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font:inherit}
+input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--bluebg)}
+.btns{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+button{font:inherit;border:0;border-radius:12px;padding:11px 22px;cursor:pointer;font-weight:600}
+.go{background:var(--blue);color:#fff;flex:1;min-width:140px}
+.go:hover{filter:brightness(1.1)}
+.clr{background:var(--bg);color:var(--ink);border:1.5px solid var(--line)}
+.warn{border:2px dashed var(--red);background:var(--redbg);border-radius:14px;padding:12px 16px;font-size:.85rem}
+.warn b{color:var(--red)}
+.warn ul{margin:6px 0 0;padding-left:20px}
+.verdict{border-radius:14px;padding:14px 16px;font-weight:700;margin-bottom:12px}
+.v-bad{background:var(--redbg);color:var(--red);border:1.5px solid var(--red)}
+.v-ok{background:var(--bluebg);color:var(--blue);border:1.5px solid var(--blue)}
+.pair{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:.92rem}
+.pair:last-child{border:0}
+.pair small{display:block;color:var(--mut);font-size:.76rem}
+.badge{white-space:nowrap;border-radius:99px;padding:3px 12px;font-size:.8rem;font-weight:700}
+.b-x{background:var(--red);color:#fff}.b-ok{background:var(--bluebg);color:var(--blue)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border-radius:12px;padding:7px 12px;font-size:.85rem;border:1.5px solid}
+.chip.r{border-color:var(--red);background:var(--redbg);color:var(--red)}
+.chip.s{border-color:var(--blue);background:var(--bluebg);color:var(--blue)}
+.chip small{display:block;font-size:.7rem;opacity:.85}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.leg{font-size:.78rem;color:var(--mut)}
+.leg div{margin:2px 0}
+footer{text-align:center;color:var(--mut);font-size:.8rem;padding:6px 16px 30px}
+footer b{color:var(--ink)}
+.err{color:var(--red);font-size:.82rem;margin-top:8px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<span class="tag">Beta-lactam</span>
+<h1>ตรวจสอบการแพ้ยาข้ามกลุ่ม (Cross-Allergy)</h1>
+<p>พิมพ์ชื่อยาสูงสุด 4 ตัว แล้วกด “วิเคราะห์” เพื่อดูโอกาสเกิดการแพ้ข้าม</p>
+</div></header>
+<main>
+<div class="card">
+<h2>1) ระบุรายการยา (สูงสุด 4 ตัว)</h2>
+<div class="grid" id="inputs"></div>
+<datalist id="dl"></datalist>
+<div class="err" id="err"></div>
+<div class="btns"><button class="go" id="go">วิเคราะห์</button><button class="clr" id="clr">ล้างข้อมูล</button></div>
+</div>
+<div id="out"></div>
+<div class="card">
+<div class="warn"><b>หลีกเลี่ยงยากลุ่ม beta-lactam ทั้งหมด หาก:</b>
+<ul><li>เคยเข้า ICU จากอาการแพ้</li>
+<li>แพ้แบบ delayed ที่ทำให้เกิด interstitial nephritis, hepatitis, hemolytic anemia</li>
+<li>แพ้ผิวหนังรุนแรงแบบ delayed: SJS, TEN, exfoliative dermatitis, AGEP, DRESS</li></ul></div>
+<div class="leg" style="margin-top:12px">
+<div><b>X1</b> side chain เหมือนกัน – มีหลักฐานทางคลินิก | <b>X2</b> side chain เหมือนกัน – ตามทฤษฎี</div>
+<div><b>X3</b> side chain คล้ายกัน – มีโอกาสเกิด | <b>X4</b> beta-lactam ring – มีหลักฐานทางคลินิก | <b>X5</b> beta-lactam ring – ตามทฤษฎี</div>
+<div>* ใช้กับยาสูตรผสม beta-lactamase inhibitor ด้วย (amoxicillin-clavulanate, piperacillin-tazobactam)</div></div>
+</div>
+</main>
+<footer>
+ข้อมูลอ้างอิง: Interior Health Authority / <a href="https://www.bcpharmacists.org/readlinks/guest-post-beta-lactam-allergy-benefits-de-labeling-can-be-achieved-safely" target="_blank" rel="noopener" style="color:var(--blue)">BC Pharmacists</a><br>
+เครื่องมือช่วยประกอบการตัดสินใจเท่านั้น ไม่ทดแทนดุลยพินิจของผู้ประกอบวิชาชีพ<br>
+<b>พัฒนาโดย ภก.ธนวิชญ์ ทักถาม ภ.53136</b>
+</footer>
+<script>
+const D=[["Amoxicillin*","อะม็อกซีซิลลิน","amoxicillin-clavulanate,augmentin,amox"],["Ampicillin","แอมพิซิลลิน",""],["Cloxacillin","คล็อกซาซิลลิน","dicloxacillin"],["Penicillin","เพนิซิลลิน","pen v,penicillin g,pgv"],["Piperacillin*","ไพเพอราซิลลิน","piperacillin-tazobactam,tazocin,tazo"],["Cefadroxil","เซฟาดรอกซิล",""],["Cefazolin","เซฟาโซลิน",""],["Cephalexin","เซฟาเล็กซิน","cefalexin"],["Cefoxitin","เซฟอกซิติน",""],["Cefprozil","เซฟโปรซิล",""],["Cefuroxime","เซฟูร็อกซิม",""],["Cefixime","เซฟิซิม",""],["Cefotaxime","เซโฟแทกซิม",""],["Ceftazidime","เซฟตาซิดิม",""],["Ceftriaxone","เซฟไตรอะโซน",""],["Cefepime","เซฟีพิม",""],["Ertapenem","เออร์ทาพีเนม",""],["Imipenem","อิมิพีเนม","imipenem-cilastatin"],["Meropenem","เมโรพีเนม",""]];
+const P="0-1:1,0-2:5,0-3:4,0-4:3,0-5:1,0-7:1,0-9:2,1-2:5,1-3:4,1-4:3,1-5:2,1-7:2,1-9:2,2-3:5,2-4:5,3-4:5,3-8:3,4-5:3,4-7:3,4-9:3,5-7:1,5-9:2,7-9:2,8-10:2,10-11:3,10-12:1,10-13:3,10-14:1,10-15:2,11-12:3,11-13:3,11-14:3,11-15:3,12-13:3,12-14:1,12-15:1,13-14:3,13-15:3,14-15:1,16-17:5,16-18:5,17-18:5";
+const M={};P.split(",").forEach(s=>{const[a,b]=s.split(":");const[i,j]=a.split("-");M[i+"_"+j]=M[j+"_"+i]=+b});
+const code=(i,j)=>M[i+"_"+j]||0;
+const NOTE={1:"side chain เหมือนกัน (มีหลักฐานทางคลินิก)",2:"side chain เหมือนกัน (ตามทฤษฎี)",3:"side chain คล้ายกัน (มีโอกาสเกิด)",4:"beta-lactam ring (มีหลักฐานทางคลินิก)",5:"beta-lactam ring (ตามทฤษฎี)"};
+const $=id=>document.getElementById(id);
+const dl=$("dl");D.forEach(d=>{const o=document.createElement("option");o.value=d[0].replace("*","");dl.appendChild(o)});
+const inp=$("inputs");
+for(let k=0;k<4;k++){inp.insertAdjacentHTML("beforeend",`<div><label>ยาตัวที่ ${k+1}</label><input list="dl" placeholder="เช่น Amoxicillin" autocomplete="off"></div>`)}
+const fields=[...inp.querySelectorAll("input")];
+function find(t){t=t.trim().toLowerCase().replace("*","");if(!t)return -1;
+for(let i=0;i<D.length;i++){const n=D[i][0].toLowerCase().replace("*","");const al=D[i][2]?D[i][2].split(","):[];if(n===t||D[i][1]===t||al.includes(t))return i}
+for(let i=0;i<D.length;i++){if(D[i][0].toLowerCase().startsWith(t)&&t.length>=3)return i}return -1}
+const nm=i=>D[i][0].replace("*","");
+$("clr").onclick=()=>{fields.forEach(f=>f.value="");$("out").innerHTML="";$("err").textContent=""};
+$("go").onclick=()=>{
+const err=[],sel=[];
+fields.forEach(f=>{const v=f.value.trim();if(!v)return;const i=find(v);if(i<0)err.push(`ไม่พบยา “${v}” ในตาราง`);else if(sel.includes(i))err.push(`${nm(i)} ซ้ำกัน`);else sel.push(i)});
+$("err").textContent=err.join(" • ");
+if(sel.length<1){$("out").innerHTML=err.length?"":`<div class="card">กรุณาใส่ชื่อยาอย่างน้อย 1 ตัว</div>`;return}
+let h="";
+const pairs=[];for(let a=0;a<sel.length;a++)for(let b=a+1;b<sel.length;b++)pairs.push([sel[a],sel[b],code(sel[a],sel[b])]);
+const anyX=pairs.some(p=>p[2]);
+h+=`<div class="card"><h2>2) ผลการวิเคราะห์</h2>`;
+if(sel.length<2)h+=`<div class="verdict v-ok">ใส่ยา 1 ตัว – ดูรายการยาที่เสี่ยงแพ้ข้ามด้านล่าง</div>`;
+else{h+=anyX?`<div class="verdict v-bad">⚠ พบโอกาสเกิดการแพ้ข้ามระหว่างยาที่ระบุ</div>`:`<div class="verdict v-ok">✓ ไม่พบโอกาสแพ้ข้ามระหว่างยาที่ระบุ (โครงสร้างต่างกัน)</div>`;
+pairs.forEach(([a,b,c])=>{h+=`<div class="pair"><div>${nm(a)} ↔ ${nm(b)}<small>${c?NOTE[c]:"โครงสร้างต่างกัน ถือว่าปลอดภัยต่อการสั่งใช้"}</small></div><span class="badge ${c?"b-x":"b-ok"}">${c?"X"+c+" เสี่ยง":"✓ ปลอดภัย"}</span></div>`})}
+h+=`</div>`;
+const risk=[],safe=[];
+D.forEach((d,i)=>{if(sel.includes(i))return;const hit=sel.filter(s=>code(i,s)).map(s=>[s,code(i,s)]);hit.length?risk.push([i,hit]):safe.push(i)});
+h+=`<div class="two"><div class="card"><h2 style="color:var(--red)">ยาที่มีโอกาสแพ้ข้าม (${risk.length})</h2><div class="chips">`;
+h+=risk.length?risk.map(([i,hit])=>`<div class="chip r">${nm(i)}<small>${hit.map(x=>"X"+x[1]+" กับ "+nm(x[0])).join(", ")}</small></div>`).join(""):`<span class="leg">ไม่มี</span>`;
+h+=`</div></div><div class="card"><h2 style="color:var(--blue)">ยาที่สามารถใช้ได้ (${safe.length})</h2><div class="chips">`;
+h+=safe.length?safe.map(i=>`<div class="chip s">${nm(i)}</div>`).join(""):`<span class="leg">ไม่มี</span>`;
+h+=`</div></div></div><div class="leg" style="margin:-4px 4px 16px">* รายการ “ใช้ได้” หมายถึงโครงสร้างต่างจากทุกตัวที่ระบุ ตามตาราง ต้องพิจารณาประวัติอาการแพ้ร่วมด้วยเสมอ</div>`;
+$("out").innerHTML=h;$("out").scrollIntoView({behavior:"smooth"});
+};
+fields.forEach(f=>f.addEventListener("keydown",e=>{if(e.key==="Enter")$("go").click()}));
+</script>
+</body>
+</html>
